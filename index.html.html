@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Laura, ahora tu vida será más interesante</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #080810;
+            --card: #0f0f1a;
+            --card-border: #1e1e32;
+            --gold: #c9a96e;
+            --gold-light: #e8c98a;
+            --text: #f0ede4;
+            --text-dim: #7878a0;
+            --true-color: #4ade80;
+            --false-color: #f87171;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px 16px 40px;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeUp 0.45s ease; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── INTRO ── */
+        .intro-wrap { padding: 32px 0; }
+
+        .tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            border: 1px solid rgba(201,169,110,.4);
+            padding: 5px 14px;
+            border-radius: 100px;
+            margin-bottom: 28px;
+        }
+
+        .intro-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(26px, 7.5vw, 34px);
+            line-height: 1.2;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .intro-title .gold { color: var(--gold); }
+
+        .intro-sub {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-style: italic;
+            font-size: 14px;
+            color: var(--text-dim);
+            border-left: 2px solid var(--gold);
+            padding: 12px 18px;
+            background: rgba(201,169,110,.04);
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .intro-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0 32px;
+        }
+
+        .legend-item {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .legend-true {
+            background: rgba(74,222,128,.07);
+            border: 1px solid rgba(74,222,128,.2);
+            color: var(--true-color);
+        }
+
+        .legend-false {
+            background: rgba(248,113,113,.07);
+            border: 1px solid rgba(248,113,113,.2);
+            color: var(--false-color);
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--card-border);
+            margin: 24px 0;
+        }
+
+        /* ── GAME ── */
+        .progress-wrap { margin-bottom: 20px; }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label { font-size: 11px; color: var(--text-dim); letter-spacing: .5px; }
+        .progress-count { font-size: 11px; color: var(--gold); font-weight: 600; }
+
+        .progress-bar {
+            height: 3px;
+            background: var(--card-border);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 100px;
+            transition: width .5s ease;
+        }
+
+        .story-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 28px 22px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: .35;
+        }
+
+        .story-num {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: .65;
+            margin-bottom: 14px;
+        }
+
+        .story-text {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text);
+        }
+
+        .reveal {
+            display: none;
+            margin-top: 18px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            animation: revealPop .35s ease;
+        }
+
+        @keyframes revealPop {
+            from { opacity: 0; transform: scale(.95); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .reveal.correct {
+            background: rgba(74,222,128,.07);
+            border: 1px solid rgba(74,222,128,.22);
+        }
+
+        .reveal.wrong {
+            background: rgba(248,113,113,.07);
+            border: 1px solid rgba(248,113,113,.22);
+        }
+
+        .reveal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 9px;
+        }
+
+        .reveal-icon { font-size: 20px; }
+        .reveal-label { font-size: 13px; font-weight: 600; }
+        .reveal.correct .reveal-label { color: var(--true-color); }
+        .reveal.wrong   .reveal-label { color: var(--false-color); }
+
+        .reveal-context {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* ── BUTTONS ── */
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .btn-choice {
+            padding: 18px 10px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all .2s ease;
+            letter-spacing: .3px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-true {
+            background: rgba(74,222,128,.08);
+            border-color: rgba(74,222,128,.28);
+            color: var(--true-color);
+        }
+
+        .btn-true:active {
+            background: rgba(74,222,128,.2);
+            border-color: var(--true-color);
+            transform: scale(.97);
+        }
+
+        .btn-false {
+            background: rgba(248,113,113,.08);
+            border-color: rgba(248,113,113,.28);
+            color: var(--false-color);
+        }
+
+        .btn-false:active {
+            background: rgba(248,113,113,.2);
+            border-color: var(--false-color);
+            transform: scale(.97);
+        }
+
+        .btn-choice:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-next {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #0a0808;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: .5px;
+            transition: all .2s ease;
+            display: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-next:active { opacity: .88; transform: scale(.98); }
+
+        .btn-primary {
+            width: 100%;
+            padding: 18px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #0a0808;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: .5px;
+            transition: all .2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-primary:active { opacity: .88; transform: scale(.98); }
+
+        /* card slide */
+        .slide-in {
+            animation: slideIn .32s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(28px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ── SCORE ── */
+        .score-wrap { padding: 28px 0 20px; text-align: center; }
+
+        .score-emoji { font-size: 60px; display: block; margin-bottom: 12px; }
+
+        .score-heading {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            color: var(--gold);
+            margin-bottom: 24px;
+        }
+
+        .score-number {
+            font-size: 72px;
+            font-weight: 200;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .score-number strong { color: var(--gold); font-weight: 700; }
+        .score-number span { font-size: 22px; color: var(--text-dim); }
+
+        .score-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+
+        .score-stats {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 22px;
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .stat-num {
+            font-size: 28px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-num.green { color: var(--true-color); }
+        .stat-num.red   { color: var(--false-color); }
+        .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.2px; }
+
+        .score-comment {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 22px 22px 22px 32px;
+            margin-bottom: 28px;
+            font-size: 15px;
+            line-height: 1.65;
+            font-style: italic;
+            color: var(--text);
+            text-align: left;
+            position: relative;
+        }
+
+        .score-comment::before {
+            content: '"';
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 52px;
+            color: var(--gold);
+            opacity: .25;
+            position: absolute;
+            top: -4px; left: 14px;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active">
+        <div class="intro-wrap">
+            <div class="tag">Un juego para ti</div>
+            <h1 class="intro-title">Laura, ahora tu vida<br>será más <span class="gold">interesante</span></h1>
+            <div class="intro-sub">
+                "A ver quién conoces que le hayan hecho un juego personalizado para ella"
+            </div>
+            <p class="intro-desc">
+                15 historias de la vida de Robert. Algunas le pasaron de verdad.<br>Otras, las he inventado.<br><br>
+                ¿Sabes distinguirlas?
+            </p>
+            <div class="legend">
+                <div class="legend-item legend-true">✓ &nbsp;VERDAD<br><small style="font-weight:400;opacity:.7">Le pasó de verdad</small></div>
+                <div class="legend-item legend-false">✗ &nbsp;MENTIRA<br><small style="font-weight:400;opacity:.7">Me lo inventé</small></div>
+            </div>
+            <div class="divider"></div>
+            <button class="btn-primary" onclick="startGame()">Empezar el juego →</button>
+        </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="screen-game" class="screen">
+        <div class="progress-wrap">
+            <div class="progress-info">
+                <span class="progress-label">Pregunta</span>
+                <span class="progress-count" id="prog-count">1 / 15</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div id="story-card" class="story-card">
+            <div class="story-num" id="story-num">Historia 1</div>
+            <p class="story-text" id="story-text"></p>
+            <div class="reveal" id="reveal">
+                <div class="reveal-header">
+                    <span class="reveal-icon" id="r-icon"></span>
+                    <span class="reveal-label" id="r-label"></span>
+                </div>
+                <p class="reveal-context" id="r-context"></p>
+            </div>
+        </div>
+
+        <div class="btn-row" id="btn-row">
+            <button class="btn-choice btn-true" id="btn-true" onclick="answer(true)">✓ Verdad</button>
+            <button class="btn-choice btn-false" id="btn-false" onclick="answer(false)">✗ Mentira</button>
+        </div>
+
+        <button class="btn-next" id="btn-next" onclick="nextQ()">Siguiente →</button>
+    </div>
+
+    <!-- SCORE -->
+    <div id="screen-score" class="screen">
+        <div class="score-wrap">
+            <span class="score-emoji" id="s-emoji">🎉</span>
+            <h2 class="score-heading">Resultado final</h2>
+            <div class="score-number"><strong id="s-num">0</strong><span> / 15</span></div>
+            <p class="score-sub" id="s-sub"></p>
+            <div class="score-stats">
+                <div class="stat-box">
+                    <span class="stat-num green" id="s-correct">0</span>
+                    <span class="stat-label">Acertadas</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-num red" id="s-wrong">0</span>
+                    <span class="stat-label">Falladas</span>
+                </div>
+            </div>
+            <div class="score-comment" id="s-comment"></div>
+            <button class="btn-primary" onclick="startGame()">Jugar de nuevo →</button>
+        </div>
+    </div>
+
+</div>
+<script>
+const stories = [
+    {
+        text: "Cada mañana me tomo el café solo en cubierta. Un día me encontré a un cliente haciendo yoga completamente desnudo a las 7 de la mañana.",
+        answer: true,
+        context: "Real, y completamente inesperado. Me quedé sin palabras durante 30 segundos. Él siguió con el downward dog como si nada. 👀"
+    },
+    {
+        text: "En una cala remota no podíamos deshacernos de la basura. Plan maestro: fuimos a la parte trasera de un restaurante del pueblo y la mezclamos con la suya. Sus bolsas negras, las nuestras blancas. Casi no se notó.",
+        answer: true,
+        context: "Totalmente real. La operación duró 11 minutos y nos sentimos criminales masterminds. Hasta la fecha, sin rastro. 😄"
+    },
+    {
+        text: "En una noche de tormenta un yate pequeño nos impactó y las cadenas se enredaron. Tuvimos que asaltar el yate para cortarle la cadena, cual piratas en el Caribe.",
+        answer: true,
+        context: "Pasó de verdad. Y lo de 'piratas' no es exageración, fue exactamente así. Linterna, cuchillo y poca ropa. ⚓"
+    },
+    {
+        text: "Viví en un yate decorado completamente con estatuas y detalles de Versace. Tenía un cine oculto tras una pared falsa y una sala de juegos con ruleta, billar y futbolín.",
+        answer: true,
+        context: "Cada detalle es real. La pared falsa tenía mecanismo de palanca. Dormí tres meses rodeado de Versace. 🎰"
+    },
+    {
+        text: "El primer día de clientes, el hijo menor se levantó con un problema: no había llegado a tiempo al baño. Para disimularlo usó un gel que encontró tipo WC Pato y dejó el colchón completamente verde. Nos compensaron invitándonos a cenar.",
+        answer: true,
+        context: "Real. Y la cena de compensación no llegó ni cerca de lo que fue limpiar eso. El colchón era verde lima. 🟢"
+    },
+    {
+        text: "Con los dueños a bordo, un amigo de la familia aprovechó la ausencia de la dueña para traer compañía: tres chicas de Europa del Este de no más de 24 años. Les pusimos el mote de Chocoplovas y desde entonces así llamamos a todas.",
+        answer: true,
+        context: "Completamente real. El mote Chocoplovas sobrevivió mucho más que ese charter. Es vocabulario de a bordo desde entonces. 😂"
+    },
+    {
+        text: "Una noche de fiesta con el hijo de los dueños se nos fue de las manos. El capitán acabó encima de una invitada con un pepino al grito de '¡Comet el pepino!' y terminó la noche picando con los nudillos en el yate vecino quejándose de que si eran ellos los que habían llamado a Capitanía.",
+        answer: true,
+        context: "Real. Y lo del yate vecino sigue siendo el momento más surrealista de mi vida. El capitán lo hizo con total convicción. 🫣"
+    },
+    {
+        text: "Un cliente insistió en aprender a manejar el yate. En menos de un minuto había girado 180 grados apuntando a un ferry de frente. Cuando le explicamos lo que había pasado dijo: 'Ah, pensaba que los ferrys tenían que apartarse'.",
+        answer: false,
+        context: "Esta me la inventé, aunque lo de los clientes al timón siempre da material. Los hay que lo intentan y se quedan con cara de nada. 😅"
+    },
+    {
+        text: "En Cerdeña bajé a buscar provisiones. Cuando volví, el yate había cambiado de amarre sin avisarme. Pasé dos horas sentado en el pantalán con cuatro bolsas de supermercado hasta que alguien se dio cuenta de que faltaba tripulación.",
+        answer: false,
+        context: "Inventada, pero te juro que algo parecido podría haber pasado en cualquier temporada. El protocolo de aviso no siempre existe. 😄"
+    },
+    {
+        text: "Una clienta muy elegante me preguntó si el yate tenía piscina climatizada porque no podía bañarse en agua fría. Le dije que sí, que era el Mediterráneo y que en verano ronda los 26 grados. Me miró cinco segundos sin pestañear y no me volvió a dirigir la palabra en tres días.",
+        answer: false,
+        context: "Falsa. Aunque preguntas parecidas sí las he escuchado. La escena del silencio me la inventé, pero el personaje es totalmente real en el mundo del charter. 😂"
+    },
+    {
+        text: "Fondeados en Formentera, un velero alemán se ancló tan cerca que casi se tocaban los cascos. El patrón subió a cubierta en speedo y empezó a tocar la trompeta durante 40 minutos. Cuando le pedimos que parase dijo que éramos afortunados de escucharle gratis. Esa noche pusimos reggaeton a todo volumen hasta que recogió el ancla y se fue.",
+        answer: false,
+        context: "Inventada. Pero el reggaeton como arma de defensa marítima tiene un potencial enorme. Igual lo aplico algún día. 🎵"
+    },
+    {
+        text: "En Ibiza fuimos a recoger a los dueños en zodiac con el mar algo movido. La dueña, de lino blanco y bolso de diseño, se negó a mojarse los pies. Estuvimos 20 minutos maniobrando hasta que el patrón tuvo que cargarla literalmente a hombros. El bolso llegó seco. Ella ni las gracias.",
+        answer: false,
+        context: "Falsa. Aunque cruzar en zodiac con pasajeros de alto standing es siempre una negociación de fuerzas. El bolso suele tener más protagonismo que la persona. 😄"
+    },
+    {
+        text: "En Mónaco bajamos a tierra y acabamos en un casino. Un marinero que nunca había pisado uno metió sin querer una ficha de 100 euros en una tragaperras creyendo que era de 1 euro. La ganó. Cobró 340 euros e invitó a cenar a toda la tripulación. Llegó al barco con más dinero del que había salido.",
+        answer: false,
+        context: "Inventada, aunque en Mónaco todo parece posible... incluso ganar. La realidad suele ser bastante distinta. 😅"
+    },
+    {
+        text: "Tras tres días de mal tiempo el cocinero anunció que se le había acabado un ingrediente básico y que la cena sería 'creativa'. Los clientes comieron sin quejarse y hasta le felicitaron. La tripulación nos hicimos bocadillos. Al día siguiente el cocinero nos dijo muy serio que la iba a incluir en su carta fija.",
+        answer: false,
+        context: "Falsa. Pero el cocinero de a bordo y sus soluciones de emergencia son material para otro juego. Te lo cuento en persona mejor. 👨‍🍳"
+    },
+    {
+        text: "En Mallorca llamamos a un técnico por una avería menor. La arregló en diez minutos y nos pasó una factura de 1.800 euros. Cuando pusimos cara de incredulidad explicó que el desplazamiento en lancha en temporada alta tenía suplemento. Venía del pantalán de al lado, a 400 metros.",
+        answer: false,
+        context: "Inventada. Aunque las facturas del puerto en temporada alta son casi tan absurdas como esta. Casi. 💸"
+    }
+];
+
+let deck = [], cur = 0, score = 0, wrong = 0, answered = false;
+
+function shuffle(a) {
+    const b = [...a];
+    for (let i = b.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [b[i], b[j]] = [b[j], b[i]];
+    }
+    return b;
+}
+
+function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+    deck = shuffle(stories);
+    cur = 0; score = 0; wrong = 0;
+    show('screen-game');
+    loadQ();
+}
+
+function loadQ() {
+    answered = false;
+    const q = deck[cur];
+
+    document.getElementById('story-num').textContent = 'Historia ' + (cur + 1);
+    document.getElementById('story-text').textContent = q.text;
+    document.getElementById('reveal').style.display = 'none';
+    document.getElementById('btn-next').style.display = 'none';
+    document.getElementById('prog-count').textContent = (cur + 1) + ' / 15';
+    document.getElementById('prog-fill').style.width = ((cur / 15) * 100) + '%';
+
+    document.getElementById('btn-true').disabled = false;
+    document.getElementById('btn-false').disabled = false;
+
+    const card = document.getElementById('story-card');
+    card.classList.remove('slide-in');
+    void card.offsetWidth;
+    card.classList.add('slide-in');
+}
+
+function answer(pick) {
+    if (answered) return;
+    answered = true;
+
+    const q = deck[cur];
+    const ok = (pick === q.answer);
+    if (ok) score++; else wrong++;
+
+    document.getElementById('btn-true').disabled = true;
+    document.getElementById('btn-false').disabled = true;
+
+    const rev = document.getElementById('reveal');
+    rev.style.display = 'block';
+    rev.className = 'reveal ' + (ok ? 'correct' : 'wrong');
+
+    document.getElementById('r-icon').textContent = ok ? '✓' : '✗';
+    document.getElementById('r-label').textContent = ok
+        ? ('¡Correcto! Era ' + (q.answer ? 'Verdad ✓' : 'Mentira ✗'))
+        : ('Incorrecto. Era ' + (q.answer ? 'Verdad ✓' : 'Mentira ✗'));
+    document.getElementById('r-context').textContent = q.context;
+
+    const nxt = document.getElementById('btn-next');
+    nxt.style.display = 'block';
+    nxt.textContent = cur < 14 ? 'Siguiente historia →' : 'Ver resultado →';
+}
+
+function nextQ() {
+    cur++;
+    if (cur >= 15) showScore();
+    else loadQ();
+}
+
+function showScore() {
+    show('screen-score');
+    document.getElementById('s-num').textContent = score;
+    document.getElementById('s-correct').textContent = score;
+    document.getElementById('s-wrong').textContent = wrong;
+
+    let emoji, comment, sub;
+
+    if (score <= 5) {
+        emoji = '😏';
+        sub = 'Necesitas más trabajo de campo';
+        comment = 'Suspendida. Claramente no me conoces nada... aunque tampoco llevamos mucho tiempo hablando, así que te perdono 😏';
+    } else if (score <= 9) {
+        emoji = '😄';
+        sub = 'Algo has captado';
+        comment = 'No está mal. Algo has captado, aunque todavía te queda mucho por descubrir 😄';
+    } else if (score <= 12) {
+        emoji = '👀';
+        sub = 'Impresionante para el tiempo que llevamos';
+        comment = 'Impressive. Llevas poco tiempo y ya me lees bastante bien 👀';
+    } else {
+        emoji = '😂';
+        sub = score + ' de 15 — esto requiere explicación';
+        comment = 'O me conoces demasiado bien o has hecho trampa. En cualquier caso, me debes una explicación 😂';
+    }
+
+    document.getElementById('s-emoji').textContent = emoji;
+    document.getElementById('s-sub').textContent = sub;
+    document.getElementById('s-comment').textContent = comment;
+}
+</script>
+</body>
+</html>
